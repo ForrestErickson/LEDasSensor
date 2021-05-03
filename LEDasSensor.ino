@@ -22,9 +22,19 @@ int LED02GND = 12;          // LED ground
                        
 int val01 = 0;          // variable to store the value read from sense01
 int val02 = 0;          // variable to store the value read from sense02
+float val01EMA = 0;     // variable to store the exponential moving average sense01
+float val02EMA = 0;     // variable to store the exponential moving average sense02
+
 
 //int light = 217;        // set light threshold
 int light = 900;        // set in !AS lab with red LED as sensor
+
+//An exponential moving average (EMA),
+float alpha = 0.99;
+//float alpha = 0.25;
+//float alpha = 0.125;
+
+
 
 void setup()
 {
@@ -35,6 +45,12 @@ void setup()
   pinMode(LED02GND, OUTPUT);
   digitalWrite(LED01GND, LOW);
   digitalWrite(LED02GND, LOW);
+
+// Get intial values for EMA
+  val01EMA = map(analogRead(sense01),0 ,1024, 0, 5000);
+  val02EMA = map(analogRead(sense02),0 ,1024, 0, 5000);
+
+  
 }
 
 void loop()
@@ -45,8 +61,10 @@ void loop()
   val02 = map(analogRead(sense02),0 ,1024, 0, 5000);      // read sense02 led
   
   
-  Serial.println(val01);            //debug print
+//  Serial.println(val01);            //debug print
 //  Serial.println(val02);            //debug print
+    val01EMA = alpha*val01 + (1-alpha)*val01EMA;
+    Serial.println(val01EMA);
   
  if (val01 >= light) {              // check if light
       digitalWrite(LED01, LOW);     // if light, turn off led
