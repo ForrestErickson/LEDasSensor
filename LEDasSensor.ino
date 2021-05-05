@@ -50,12 +50,29 @@ int light = 50;        // set in !AS lab with red LED as sensor
 //float alpha = 0.25;
 float alpha = 0.125;
 
+//Timer setup for ADC
+// defines for setting and clearing register bits
+#ifndef cbi
+#define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
+#endif
+#ifndef sbi
+#define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
+#endif
+
 void setup()
 {
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);  //LED goes high as setup() starts
 
-  Serial.begin(115200);          //  setup serial
+  // set ADC prescale to 16 for faster conversion, 1MHz conversion. Measured at 25uS conversion
+  sbi(ADCSRA,ADPS2) ;
+  cbi(ADCSRA,ADPS1) ;
+  cbi(ADCSRA,ADPS0) ;
+
+//  Serial.begin(115200);          //  setup serial
+//  Serial.begin(1000000);          //  setup serial
+  Serial.begin(2000000);          //  setup serial  1.8K sampe / second at 1MHz ADC clock
+  
   pinMode(LED01, OUTPUT);
   pinMode(LED02, OUTPUT);
   pinMode(LED01GND, OUTPUT);
@@ -89,27 +106,33 @@ void loop()
 
   //Print out the EMA smoothed value.
   val01EMA = alpha * val01 + (1 - alpha) * val01EMA;
-  Serial.println(val01EMA);
+
+  //Serial print adds significant delay. Even at 2Mbaud the sample rate is limited to: 1.6 to 2.0 KS/Sec
+  Serial.println(val01EMA);     // 4.3KS/Sec when commented and with ADC clock 1MHz.
+
   val02EMA = alpha * val02 + (1 - alpha) * val02EMA;
 //  Serial.println(val01EMA);
 
   //LED 1
-  if (val01EMA >= light) {         
-    digitalWrite(LED01, LOW);     
-  } else {
-    digitalWrite(LED01, HIGH);    
-  }
+//  if (val01EMA >= light) {         
+//    digitalWrite(LED01, LOW);     
+//  } else {
+//    digitalWrite(LED01, HIGH);    
+//  }
+  digitalWrite(LED01, (val01EMA <= light));
 
   //LED 2
   //About 26uS to write the LED
-  if (val02EMA >= light) {              
-    digitalWrite(LED02, LOW);     
-  } else {
-    digitalWrite(LED02, HIGH);    
-  }
+//  if (val02EMA >= light) {              
+//    digitalWrite(LED02, LOW);     
+//  } else {
+//    digitalWrite(LED02, HIGH);    
+//  }
+
+  digitalWrite(LED02, (val02EMA <= light));
 
   //delay(1); //Slow down data.
-  delayMicroseconds(SAMPLEPERIOD); //Slow down data. 
+//  delayMicroseconds(SAMPLEPERIOD); //Slow down data. With out delay, and 1MHz clock sample freq 1.7KHz,
 
   
 }//end loop()
