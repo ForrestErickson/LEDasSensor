@@ -13,7 +13,12 @@
    From: https://forum.arduino.cc/t/leds-as-photo-diodes/114569
 */
 
+/*Set frequency. Set 4000, however the measures loop frequency is about 820Hz
+ * 
+ */
+
 #define SAMPLEFREQ 4000                       //About 66.6 samples per cycle of 60 hz.
+ 
 const int SAMPLEPERIOD = 1000000/SAMPLEFREQ;  //Microseconds. 
 
 //Light sensor LEDs wired for
@@ -75,7 +80,9 @@ void setup()
 
 void loop()
 {
-  analogRead(senseReset);     //Read ground pin to normalize by discharge ADC
+  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));  //Toggle built in LED so we can sample rate.
+  analogRead(senseReset);     //Read ground pin to normalize by discharge ADC. About 120uS for read.
+  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));  //Toggle built in LED so we can sample rate.
   val01 = map(analogRead(sense01), 0 , 1024, 0, 5000);    // read sense01 led and map to mV.
   analogRead(senseReset);     //Read ground pin to normalize by discharge ADC
   val02 = map(analogRead(sense02), 0 , 1024, 0, 5000);    // read sense02 led
@@ -92,15 +99,14 @@ void loop()
   } else {
     digitalWrite(LED01, HIGH);    
   }
-  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));  //Toggle built in LED so we can sample rate.
 
   //LED 2
+  //About 26uS to write the LED
   if (val02EMA >= light) {              
     digitalWrite(LED02, LOW);     
   } else {
     digitalWrite(LED02, HIGH);    
   }
-  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));  //Toggle built in LED so we can sample rate.
 
   //delay(1); //Slow down data.
   delayMicroseconds(SAMPLEPERIOD); //Slow down data. 
