@@ -13,8 +13,8 @@
    From: https://forum.arduino.cc/t/leds-as-photo-diodes/114569
 */
 
-#define SAMPLEFREQ 4000
-const int SAMPLEPERIOD = 1000000/SAMPLEFREQ;  //Microseconds. About 66.6 samples per cycle of 60 hz.
+#define SAMPLEFREQ 4000                       //About 66.6 samples per cycle of 60 hz.
+const int SAMPLEPERIOD = 1000000/SAMPLEFREQ;  //Microseconds. 
 
 //Light sensor LEDs wired for
 int senseReset = 0;     // A0 input tied to GND.
@@ -33,6 +33,8 @@ float val01EMA = 0;     // variable to store the exponential moving average sens
 float val02EMA = 0;     // variable to store the exponential moving average sense02
 
 
+//Threshold for dark indication.
+//Note there is no hysterisis on this comparision.
 //int light = 217;        // set light threshold
 //int light = 900;        // set in !AS lab with red LED as sensor before adding read to A0 normalization.
 int light = 50;        // set in !AS lab with red LED as sensor
@@ -46,15 +48,14 @@ float alpha = 0.125;
 void setup()
 {
   pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, HIGH);
+  digitalWrite(LED_BUILTIN, HIGH);  //LED goes high as setup() starts
 
   Serial.begin(115200);          //  setup serial
-  //_SFR_IO8(0x35) |= 0x10;   // global disable pull up resistors
   pinMode(LED01, OUTPUT);
   pinMode(LED02, OUTPUT);
   pinMode(LED01GND, OUTPUT);
   pinMode(LED02GND, OUTPUT);
-  digitalWrite(LED01GND, LOW);
+  digitalWrite(LED01GND, LOW);    //Ground LED cathode pins.
   digitalWrite(LED02GND, LOW);
 
   // Get intial values for EMA
@@ -63,10 +64,10 @@ void setup()
   analogRead(senseReset);     //Read ground pin to normalize by discharge ADC
   val02EMA = map(analogRead(sense02), 0 , 1024, 0, 5000);
 
-  digitalWrite(LED_BUILTIN, LOW);
+  digitalWrite(LED_BUILTIN, LOW); //LED goes low as end of setup() 
 }// end setup()
 
-/* Read the light (LED Voltages) and scale to 0 to 5V.
+/* Read the light (LED Voltages) and scale to 0 to 5000 mV.
  * Take EMA of readings.
  * Compair to a threshold value and turn on LEDs if measured light below threshold.
  * Wait till time to take next sample.
@@ -74,34 +75,35 @@ void setup()
 
 void loop()
 {
-  //  val01 = analogRead(sense01);      // read sense01 led
-  //  val02 = analogRead(sense02);      // read sense02 led
   analogRead(senseReset);     //Read ground pin to normalize by discharge ADC
   val01 = map(analogRead(sense01), 0 , 1024, 0, 5000);    // read sense01 led and map to mV.
   analogRead(senseReset);     //Read ground pin to normalize by discharge ADC
   val02 = map(analogRead(sense02), 0 , 1024, 0, 5000);    // read sense02 led
 
   //Print out the EMA smoothed value.
-  //  Serial.println(val01);            //debug print
-  //  Serial.println(val02);            //debug print
   val01EMA = alpha * val01 + (1 - alpha) * val01EMA;
   Serial.println(val01EMA);
   val02EMA = alpha * val02 + (1 - alpha) * val02EMA;
 //  Serial.println(val01EMA);
 
-
-  if (val01EMA >= light) {              // check if light
-    digitalWrite(LED01, LOW);     // if light, turn off led
+  //LED 1
+  if (val01EMA >= light) {         
+    digitalWrite(LED01, LOW);     
   } else {
-    digitalWrite(LED01, HIGH);    // if dark, turn on led
+    digitalWrite(LED01, HIGH);    
   }
+  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));  //Toggle built in LED so we can sample rate.
 
-  if (val02EMA >= light) {              // check if light
-    digitalWrite(LED02, LOW);     // if light, turn off led
+  //LED 2
+  if (val02EMA >= light) {              
+    digitalWrite(LED02, LOW);     
   } else {
-    digitalWrite(LED02, HIGH);    // if dark, turn on led
+    digitalWrite(LED02, HIGH);    
   }
+  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));  //Toggle built in LED so we can sample rate.
 
   //delay(1); //Slow down data.
   delayMicroseconds(SAMPLEPERIOD); //Slow down data. 
+
+  
 }//end loop()
