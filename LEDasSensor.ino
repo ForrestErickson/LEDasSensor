@@ -62,8 +62,8 @@ int light = 10;         // set in !AS lab with red LED as sensor
 //float alpha = 0.125;
 //float alpha = 0.0625;
 //float alpha = 0.0375;     //P-P is 23 to 34 under lab lights.
-float alpha = 0.01;
-//float alpha = 0.001;        //P-P is 29 to 30 under lab lights.
+//float alpha = 0.01;
+float alpha = 0.001;        //P-P is 29 to 30 under lab lights.
 
 //Timer setup for ADC
 // defines for setting and clearing register bits
