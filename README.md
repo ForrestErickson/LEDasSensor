@@ -64,3 +64,26 @@ The indicator LEDs are wired to two pins each because I did not have handy groun
 ![LEDasSensorWiring](LEDasSensorWiring.jpg)
 
 
+###  Arduino Ploter Output. EMA Alpha about One
+The now Red Sensor LED is wired to A5.
+I set the EMA (Exponential Moving Average) coefficent Alpha to 0.99
+The 60Hz ripple and higher harmonic distortions are visible.
+![LEDasSensor_ArduinoPlotalpha1](LEDasSensor_ArduinoPlotalpha1.gif)
+
+
+###  Arduino Ploter Output. EMA Alpha 0.01
+The now Red Sensor LED is wired to A5.
+I set the EMA (Exponential Moving Average) coefficent Alpha to 0.01
+The 60Hz ripple and higher harmonic distortions are much reduced.
+![LEDasSensor_ArduinoPlotalpha_01](LEDasSensor_ArduinoPlotalpha_01.gif)
+
+###  Arduino Ploter Output. EMA Alpha 0.001
+The now Red Sensor LED is wired to A5.
+I set the EMA (Exponential Moving Average) coefficent Alpha to 0.001
+The 60Hz ripple small and and higher harmonic distortions even less visible.
+![LEDasSensor_ArduinoPlotalpha_001](LEDasSensor_ArduinoPlotalpha_001.gif)
+
+
+
+
+
